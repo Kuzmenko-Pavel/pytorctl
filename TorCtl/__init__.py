@@ -3,7 +3,7 @@ TorCtl is a python Tor controller with extensions to support path
 building and various constraints on node and path selection, as well as
 statistics gathering.
 
-Apps can hook into the TorCtl package at whatever level they wish. 
+Apps can hook into the TorCtl package at whatever level they wish.
 
 The lowest level of interaction is to use the TorCtl module
 (TorCtl/TorCtl.py). Typically this is done by importing TorCtl.TorCtl
