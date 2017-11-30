@@ -650,7 +650,7 @@ class Connection:
         else:
             # check PROTOCOLINFO for authentication type
             try:
-                authInfo = self.sendAndRecv(b"PROTOCOLINFO\r\n")[1][1]
+                authInfo = self.sendAndRecv("PROTOCOLINFO\r\n")[1][1]
             except ErrorReply as exc:
                 raise IOError(
                     "Unable to query PROTOCOLINFO for the authentication type: %s" % exc)

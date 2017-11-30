@@ -221,7 +221,7 @@ class BufSock:
                 return result
 
         while 1:
-            s = self._s.recv(128)
+            s = self._s.recv(128).decode()
             if not s:
                 return None
             # XXX: This really does need an exception
@@ -240,7 +240,7 @@ class BufSock:
                 self._buf.append(s)
 
     def write(self, s):
-        self._s.send(s)
+        self._s.send(s.encode())
 
     def close(self):
         self._s.close()
