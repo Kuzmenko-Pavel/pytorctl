@@ -51,6 +51,7 @@ import binascii
 import types
 import time
 import copy
+from io import open
 
 from .TorUtil import *
 
@@ -110,44 +111,44 @@ def connect(controlAddr="127.0.0.1", controlPort=9051, passphrase=None):
                                     than prompting the user)
     """
 
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((controlAddr, controlPort))
-        conn = Connection(s)
-        authType, authValue = conn.get_auth_type(), ""
+    # try:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((controlAddr, controlPort))
+    conn = Connection(s)
+    authType, authValue = conn.get_auth_type(), ""
 
-        if authType == AUTH_TYPE.PASSWORD:
-            # password authentication, promting for the password if it wasn't
-            # provided
-            if passphrase:
-                authValue = passphrase
-            else:
-                try:
-                    authValue = getpass.getpass()
-                except KeyboardInterrupt:
-                    return None
-        elif authType == AUTH_TYPE.COOKIE:
-            authValue = conn.get_auth_cookie_path()
-
-        conn.authenticate(authValue)
-        return conn
-    except socket.error as exc:
-        if "Connection refused" in exc.args:
-            # most common case - tor control port isn't available
-            print("Connection refused. Is the ControlPort enabled?")
+    if authType == AUTH_TYPE.PASSWORD:
+        # password authentication, promting for the password if it wasn't
+        # provided
+        if passphrase:
+            authValue = passphrase
         else:
-            print("Failed to establish socket: %s" % exc)
+            try:
+                authValue = getpass.getpass()
+            except KeyboardInterrupt:
+                return None
+    elif authType == AUTH_TYPE.COOKIE:
+        authValue = conn.get_auth_cookie_path()
 
-        return None
-    except Exception as exc:
-        if passphrase and str(exc) == "Unable to authenticate: password incorrect":
-            # provide a warning that the provided password didn't work, then try
-            # again prompting for the user to enter it
-            print(INCORRECT_PASSWORD_MSG)
-            return connect(controlAddr, controlPort)
-        else:
-            print(exc)
-            return None
+    conn.authenticate(authValue)
+    return conn
+    # except socket.error as exc:
+    #     if "Connection refused" in exc.args:
+    #         # most common case - tor control port isn't available
+    #         print("Connection refused. Is the ControlPort enabled?")
+    #     else:
+    #         print("Failed to establish socket: %s" % exc)
+    #
+    #     return None
+    # except Exception as exc:
+    #     if passphrase and str(exc) == "Unable to authenticate: password incorrect":
+    #         # provide a warning that the provided password didn't work, then try
+    #         # again prompting for the user to enter it
+    #         print(INCORRECT_PASSWORD_MSG)
+    #         return connect(controlAddr, controlPort)
+    #     else:
+    #         print(exc)
+    #         return None
 
 
 class TorCtlError(Exception):
@@ -1050,7 +1051,7 @@ class Connection:
         """
 
         # read contents if provided a file
-        if type(cookie) == file:
+        if hasattr(cookie, 'read'):
             cookie = cookie.read()
 
         # unlike passwords the cookie contents isn't enclosed by quotes
